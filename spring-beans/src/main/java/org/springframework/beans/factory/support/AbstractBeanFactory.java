@@ -267,7 +267,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 			/**
-			 *
+			 * 检查是不是工厂bean
+			 * 如果不是，将sharedInstance作为结果赋值给beanInstance直接返回
+			 * 如果是，通过工厂再创建实例
 			 */
 			beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		} else {
