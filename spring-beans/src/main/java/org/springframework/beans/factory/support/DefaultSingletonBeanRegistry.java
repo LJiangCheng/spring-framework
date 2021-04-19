@@ -169,21 +169,32 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 返回注册为指定名称的（原始）单例对象
+	 * 检查已完成初始化的单例，同时也允许获取一个正在创建中的对象的早期引用（解决循环引用问题）
+	 * 则：解决循环引用的方法为，允许创建早期引用，保存在专门的缓存中，并将这个创建中的对象引用返回
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
-	 * @param beanName the name of the bean to look for
-	 * @param allowEarlyReference whether early references should be created or not
-	 * @return the registered singleton object, or {@code null} if none found
+	 * @param beanName the name of the bean to look for  名称
+	 * @param allowEarlyReference whether early references should be created or not 是否应创建早期引用
+	 * @return the registered singleton object, or {@code null} if none found 单例对象，如果没有则返回null
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// 尝试从缓存获取单例 singletonObjects --> ConcurrentHashMap
 		// Quick check for existing instance without full singleton lock
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// 如果缓存中不存在，且beanName被标记为正在创建中（通过ConcurrentHashMap转的Set集合singletonsCurrentlyInCreation记录）
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			// 从earlySingletonObjects中获取
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			/**
+			 * 如果earlySingletonObjects中没有，且允许对一个正在创建中的bean进行提前引用，
+			 * 则尝试创建对象并返回创建中的引用，并将这个引用缓存到earlySingletonObjects中
+ 			 */
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
+					// 在单例锁中一致地创建早期引用，双重检查锁
 					// Consistent creation of early reference within full singleton lock
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
@@ -192,6 +203,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
+								// 创建之后将对象早期引用放入earlySingletonObjects
 								this.earlySingletonObjects.put(beanName, singletonObject);
 								this.singletonFactories.remove(beanName);
 							}

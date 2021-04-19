@@ -546,42 +546,53 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
+			// 准备：earlyApplicationListeners和earlyApplicationEvents集合的初始化
 			// Prepare this context for refreshing.
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
+			// 初始化Bean工厂，配置工厂信息
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
 			try {
+				// 预处理Bean工厂，模板方法
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
+				// BeanFactoryPostProcessor的预调用
 				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
+				// 注册Bean创建时的前置处理器（即拦截器）
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
+				// 初始化消息处理器，如果当前容器没有定义则从父容器继承
 				// Initialize message source for this context.
 				initMessageSource();
 
+				// 初始化事件分发器
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
+				// 初始化其他特殊bean，模板方法
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
+				// 检查并注册监听器
 				// Check for listener beans and register them.
 				registerListeners();
 
+				// 关键步骤：初始化剩下的所有非懒加载单例
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 
+				// 最后：清理资源缓存，发布相应事件
 				// Last step: publish corresponding event.
 				finishRefresh();
 			}
@@ -914,6 +925,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Allow for caching all bean definition metadata, not expecting further changes.
 		beanFactory.freezeConfiguration();
 
+		// 初始化所有非懒加载单例
 		// Instantiate all remaining (non-lazy-init) singletons.
 		beanFactory.preInstantiateSingletons();
 	}
@@ -1151,6 +1163,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public Object getBean(String name) throws BeansException {
 		assertBeanFactoryActive();
+		//根据名称从容器中获取bean
 		return getBeanFactory().getBean(name);
 	}
 

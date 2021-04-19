@@ -913,15 +913,42 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			logger.trace("Pre-instantiating singletons in " + this);
 		}
 
+		// 在副本上迭代，以允许init方法注册新的bean定义信息
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
+		// 触发所有非懒加载单例的初始化
 		// Trigger initialization of all non-lazy singleton beans...
 		for (String beanName : beanNames) {
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			// 非抽象 && 单例 && 非懒加载
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				/**
+				 * 关于FactoryBean和BeanFactory
+				 * BeanFactory：
+				 * 	BeanFactory是IOC容器的顶层接口，提供了IOC容器最基本的形式，给具体的IOC容器实现提供了规范。
+				 * 		如XMLBeanFactory就是一种典型的BeanFactory。
+				 * 		原始的BeanFactory无法支持spring的许多插件，如AOP功能、Web应用等。
+				 * 	常用的ApplicationContext接口就由BeanFactory接口派生而来，ApplicationContext包含BeanFactory的所有功能，
+				 * 	并有所扩展
+				 * FactoryBean:
+				 * 		FactoryBean定义了一个能<生产或者修饰对象>的工厂Bean，用于为IOC容器中Bean的实现提供更加灵活的方式，
+				 * 	可以创建更复杂的实例。
+				 * 	FactoryBean在IOC容器的基础上给Bean的实现加上了一个简单工厂模式和装饰模式，可以在getObject()方法中灵活
+				 * 	配置。在Spring源码中有很多FactoryBean的实现类。
+				 * 		一般情况下，Spring通过反射机制利用<bean>的class属性指定实现类实例化Bean，在某些情况下，实例化Bean过
+				 * 	程比较复杂，如果按照传统的方式，则需要在<bean>中提供大量的配置信息。配置方式的灵活性是受限的，这时采用编
+				 * 	码的方式可能会得到一个简单的方案。Spring为此提供了一个org.springframework.bean.factory.FactoryBean的
+				 * 	工厂类接口，用户可以通过实现该接口定制实例化Bean的逻辑。FactoryBean接口对于Spring框架来说占用重要的地位，
+				 * 	Spring自身就提供了70多个FactoryBean的实现。它们隐藏了实例化一些复杂Bean的细节，给上层应用带来了便利。从
+				 * 	Spring3.0开始，FactoryBean开始支持泛型，即接口声明改为FactoryBean<T>的形式
+				 * 		以Bean结尾，表示它是一个Bean，不同于普通Bean的是：它是实现了FactoryBean<T>接口的Bean，根据该Bean的
+				 * 	ID从BeanFactory中获取的实际上是FactoryBean的getObject()返回的对象，而不是FactoryBean本身，如果要获取
+				 *  FactoryBean对象，请在id前面加一个&符号来获取，其创建过程如下。
+				 */
 				if (isFactoryBean(beanName)) {
+					//前置一个&符号，用于关联实例化这个FactoryBean本身
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
 						FactoryBean<?> factory = (FactoryBean<?>) bean;
@@ -930,17 +957,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							isEagerInit = AccessController.doPrivileged(
 									(PrivilegedAction<Boolean>) ((SmartFactoryBean<?>) factory)::isEagerInit,
 									getAccessControlContext());
-						}
-						else {
+						} else {
+							/**
+							 * 如果是FactoryBean，那么拿到这个工厂类，判断它所代理的实例是否需要立即初始化
+							 * 想要立即初始化的话需要实现SmartFactoryBean并重写isEagerInit方法
+							 */
 							isEagerInit = (factory instanceof SmartFactoryBean &&
 									((SmartFactoryBean<?>) factory).isEagerInit());
 						}
 						if (isEagerInit) {
+							/**
+							 * 初始化目标实例，和下面调用的同一个方法
+							 */
 							getBean(beanName);
 						}
 					}
-				}
-				else {
+				} else {
+					/**
+					 * 非工厂对象直接实例化
+					 */
 					getBean(beanName);
 				}
 			}
