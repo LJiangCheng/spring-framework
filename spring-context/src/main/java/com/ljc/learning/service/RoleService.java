@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleService {
 
-	@Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    public RoleService(/*UserService userService*/) {
+	@Autowired
+    public RoleService(UserService userService) {
         System.out.println("role construct");
-        /*this.userService = userService;*/
+        this.userService = userService;
     }
 
     public void say() {

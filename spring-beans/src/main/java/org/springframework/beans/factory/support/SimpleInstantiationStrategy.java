@@ -85,8 +85,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				}
 			}
 			return BeanUtils.instantiateClass(constructorToUse);
-		}
-		else {
+		} else {
 			// Must generate CGLIB subclass.
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}

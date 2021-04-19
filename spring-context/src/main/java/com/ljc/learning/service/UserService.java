@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-	@Autowired
-    private RoleService roleService;
 
-    public UserService(/*RoleService roleService*/) {
+    private final RoleService roleService;
+
+	@Autowired
+    public UserService(RoleService roleService) {
         System.out.println("user construct");
-        /*this.roleService = roleService;*/
+        this.roleService = roleService;
     }
 
     public void toSay() {
