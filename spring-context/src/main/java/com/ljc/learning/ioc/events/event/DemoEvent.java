@@ -1,6 +1,6 @@
-package com.ljc.learning.events.event;
+package com.ljc.learning.ioc.events.event;
 
-import com.ljc.learning.bean.User;
+import com.ljc.learning.ioc.bean.User;
 import org.springframework.context.ApplicationEvent;
 
 public class DemoEvent extends ApplicationEvent {

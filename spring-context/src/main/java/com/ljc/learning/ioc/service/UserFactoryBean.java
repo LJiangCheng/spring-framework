@@ -1,7 +1,6 @@
-package com.ljc.learning.service;
+package com.ljc.learning.ioc.service;
 
-import com.ljc.learning.bean.User;
-import org.springframework.beans.factory.FactoryBean;
+import com.ljc.learning.ioc.bean.User;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.stereotype.Component;
 

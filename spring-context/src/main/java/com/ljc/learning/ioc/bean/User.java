@@ -1,4 +1,4 @@
-package com.ljc.learning.bean;
+package com.ljc.learning.ioc.bean;
 
 public class User {
 

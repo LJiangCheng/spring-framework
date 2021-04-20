@@ -1,4 +1,4 @@
-package com.ljc.learning.service;
+package com.ljc.learning.ioc.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,13 +6,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private final RoleService roleService;
-
 	@Autowired
-    public UserService(RoleService roleService) {
+    private RoleService roleService;
+
+    public UserService(/*RoleService roleService*/) {
         System.out.println("user construct");
-        this.roleService = roleService;
+        /*this.roleService = roleService;*/
     }
+
+	/*@PostConstruct
+	private void post() {
+		roleService.say();
+	}*/
 
     public void toSay() {
         roleService.say();
