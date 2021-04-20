@@ -16,11 +16,12 @@
 
 package org.springframework.scheduling.aspectj;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,7 +48,7 @@ class TestableAsyncUncaughtExceptionHandler
 	}
 
 	@Override
-	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+	public void handleUncaughtException(@NotNull Throwable ex, Method method, Object... params) {
 		descriptor = new UncaughtExceptionDescriptor(ex, method);
 		this.latch.countDown();
 		if (throwUnexpectedException) {

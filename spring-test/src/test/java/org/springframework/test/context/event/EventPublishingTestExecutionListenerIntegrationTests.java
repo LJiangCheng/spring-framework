@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -317,7 +318,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 
 		@Override
-		public void handleUncaughtException(Throwable exception, Method method, Object... params) {
+		public void handleUncaughtException(@NotNull Throwable exception, Method method, Object... params) {
 			asyncException = exception;
 			countDownLatch.countDown();
 		}

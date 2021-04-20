@@ -11,8 +11,8 @@ public class DemoListener implements ApplicationListener<DemoEvent> {
 
 	@Async
     public void onApplicationEvent(DemoEvent event) {
-        User source = (User) event.getSource();
-		System.out.println("事件：" + source);
+		User source = (User) event.getSource();
+		System.out.println(Thread.currentThread().getName() + "-事件：" + source);
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {

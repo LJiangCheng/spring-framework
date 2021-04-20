@@ -21,6 +21,8 @@ public class InitAnalyze {
 		UserService userService = (UserService) applicationContext.getBean("userService");
 		//使用Bean
 		userService.toSay();
+		//上面使用了线程池，需要手动关闭掉，否则程序不会终止
+		// TODO
 	}
 
 }

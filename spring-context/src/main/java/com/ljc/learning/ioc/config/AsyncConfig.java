@@ -1,5 +1,6 @@
 package com.ljc.learning.ioc.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -9,12 +10,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
+/**
+ * 启用spring异步机制
+ * 同时自定义异步线程池，若不重写会使用Spring默认的线程池
+ */
 @Configuration
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
-	/**
-	 * 自定义异步线程池，若不重写会使用默认的线程池
-	 */
+
 	@Override
 	public Executor getAsyncExecutor() {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -38,10 +41,11 @@ public class AsyncConfig implements AsyncConfigurer {
 		return new MyAsyncExceptionHandler();
 	}
 
-	class MyAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
+	static class MyAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
 		@Override
-		public void handleUncaughtException(Throwable throwable, Method method, Object... objects) {
+		public void handleUncaughtException(@NotNull Throwable throwable, @NotNull Method method, Object... objects) {
 			for (Object param : objects) {
+				System.out.println(throwable.getCause() + method.getName() + param.toString());
 			}
 		}
 	}
